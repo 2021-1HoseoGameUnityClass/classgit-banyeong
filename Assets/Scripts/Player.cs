@@ -91,6 +91,7 @@ public class Player : MonoBehaviour
     //총알 발사
     private void Fire()
     {
+        GetComponent<AudioSource>().Play();
         float direction = transform.localScale.x;
         Quaternion quaternion = new Quaternion(0, 0, 0, 0);
         //생성하고, 총알이 발사되도록 Bullet 컴포넌트(스크립트)에서 초기화 함수 가져옴
