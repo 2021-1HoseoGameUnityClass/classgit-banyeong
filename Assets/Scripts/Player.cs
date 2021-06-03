@@ -19,11 +19,17 @@ public class Player : MonoBehaviour
     private GameObject bulletObj = null;
 
     [SerializeField] //private로 선언해도 컴포넌트 창에서 보이게 함
-    private float moveSpeed = 3f;
+    private float moveSpeed = 5f;
+
+    private bool move = false;
+    private float moveHorizontal = 0f;
 
     void Update()
     {
-        PlayerMove();
+        if (move == true)
+        {
+            PlayerMove();
+        }
 
         if(Input.GetButtonDown("Jump"))
         {
@@ -38,7 +44,8 @@ public class Player : MonoBehaviour
 
     private void PlayerMove()
     {
-        float h = Input.GetAxis("Horizontal");
+        //float h = Input.GetAxis("Horizontal");
+        float h = moveHorizontal;
         float playerSpeed = h * moveSpeed * Time.deltaTime;
 
         Vector3 vector3 = new Vector3();
@@ -86,15 +93,48 @@ public class Player : MonoBehaviour
             GetComponent<Animator>().SetBool("Jump", false);
             isJump = false;
         }
+
     }
 
     //총알 발사
     private void Fire()
     {
+        AudioClip audioClip = Resources.Load<AudioClip>("RangedAttack");
+        GetComponent<AudioSource>().clip = audioClip;
         GetComponent<AudioSource>().Play();
         float direction = transform.localScale.x;
         Quaternion quaternion = new Quaternion(0, 0, 0, 0);
         //생성하고, 총알이 발사되도록 Bullet 컴포넌트(스크립트)에서 초기화 함수 가져옴
         Instantiate(bulletObj, bulletPos.transform.position, quaternion).GetComponent<Bullet>().InstantiateBullet(direction);
+    }
+
+    private void OnCollisionExit2D(Collision2D collision)
+    {
+        // 충돌체의 콜라이더가 몬스터 태그라면
+        if (collision.collider.tag == "Enemy")
+        {
+            if (DataManager.instance.playerHP == 0) DataManager.instance.playerHP = 0;
+            DataManager.instance.playerHP -= 1;
+            UIManager.instance.PlyaerHP();
+        }
+    }
+
+    public void OnMove(bool _right)
+    {
+        if (_right)
+        {
+            moveHorizontal = 1;
+        }
+        else
+        {
+            moveHorizontal = -1;
+        }
+        move = true;
+    }
+
+    public void OffMove()
+    {
+        moveHorizontal = 0;
+        move = false;
     }
 }
